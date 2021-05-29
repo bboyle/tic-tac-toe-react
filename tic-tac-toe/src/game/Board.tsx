@@ -57,7 +57,7 @@ class Board extends React.Component<{}, BoardState> {
     const rows = this.state.grid.map((row, rowIndex) => <tr>{row.map((value, colIndex) => {
       // https://flaviocopes.com/react-pass-parameter-event/
       // https://reactjs.org/docs/conditional-rendering.html#inline-if-else-with-conditional-operator
-      return <td>{value ? this.renderValue(value) : <button onClick={() => this.play(rowIndex, colIndex)}>{rowIndex}, {colIndex}</button>}</td>;
+      return value ? this.renderValue(value) : <td><button onClick={() => this.play(rowIndex, colIndex)}>{rowIndex}, {colIndex}</button></td>;
     })}</tr>);
 
     return (
@@ -70,12 +70,9 @@ class Board extends React.Component<{}, BoardState> {
 
 
   renderValue(value: TicTacToePlayer) {
-    if (value === 1) {
-      return <Naught/>;
-    } else {
-      return <Cross/>;
-    }
+    return <td className={`played-${value}`}>{ value === 1 ? <Naught/> : <Cross/> }</td>;
   }
 }
+
 
 export default Board;
