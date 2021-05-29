@@ -13,6 +13,7 @@ type BoardState = {
   gameOver: boolean;
   grid: TicTacToeBoard;
   player: TicTacToePlayer;
+  winner?: TicTacToePlayer;
 };
 
 
@@ -39,10 +40,10 @@ class Board extends React.Component<{}, BoardState> {
 
   detectGameOver(grid: TicTacToeBoard, row: number, column: number): { gameOver: boolean, winner?: TicTacToePlayer } {
     // check for winner on row
-    // let winner: TicTacToePlayer = this.getRowWinner(row);
-    // if (winner) {
-    //   return { gameOver: true, winner };
-    // }
+    let winner: TicTacToePlayer | null = this.getRowWinner(grid, row);
+    if (winner) {
+      return { gameOver: true, winner };
+    }
 
     // check for winner on column
     // check for winner on diagonal
@@ -68,12 +69,10 @@ class Board extends React.Component<{}, BoardState> {
     const grid = this.state.grid.map((rowValues, rowIndex) => rowValues.map((value, columnIndex) =>
       rowIndex === row && columnIndex === column ? this.state.player : value));
 
-    const { gameOver } = this.detectGameOver(grid, row, column);
-
     this.setState({
-      gameOver,
       grid,
-      player: this.state.player === 1 ? 2 : 1
+      player: this.state.player === 1 ? 2 : 1,
+      ...this.detectGameOver(grid, row, column)
     });
   }
 
@@ -87,7 +86,7 @@ class Board extends React.Component<{}, BoardState> {
     if (this.state.gameOver) {
       gameOver = <div>
         <h2>Game Over!</h2>
-        <p>Stalemate… Tough game!</p>
+        <p>{ this.state.winner ? `Player ${this.state.winner} wins!` : `Stalemate… Tough game!` }</p>
       </div>;
     }
 
@@ -110,6 +109,16 @@ class Board extends React.Component<{}, BoardState> {
 
   renderPlayed(value: TicTacToePlayer) {
     return value === 1 ? <Naught/> : <Cross/>;
+  }
+
+
+  private getRowWinner(grid: TicTacToeBoard, row: number): TicTacToePlayer | null {
+    const values = grid[row];
+    if (values[0] !== null && values.every(value => value === values[0])) {
+      return values[0];
+    }
+
+    return null;
   }
 }
 
