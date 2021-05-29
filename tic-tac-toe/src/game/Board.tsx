@@ -46,6 +46,10 @@ class Board extends React.Component<{}, BoardState> {
     }
 
     // check for winner on column
+    winner = this.getColumnWinner(grid, column);
+    if (winner) {
+      return { gameOver: true, winner };
+    }
     // check for winner on diagonal
 
     // if grid is filled, game is over
@@ -109,6 +113,16 @@ class Board extends React.Component<{}, BoardState> {
 
   renderPlayed(value: TicTacToePlayer) {
     return value === 1 ? <Naught/> : <Cross/>;
+  }
+
+
+  private getColumnWinner(grid: TicTacToeBoard, column: number): TicTacToePlayer | null {
+    const values = grid.map(row => row[column]);
+    if (values[0] !== null && values.every(value => value === values[0])) {
+      return values[0];
+    }
+
+    return null;
   }
 
 
