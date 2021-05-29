@@ -10,12 +10,14 @@ type TicTacToeValue = TicTacToePlayer | null;
 type TicTacToeBoard = TicTacToeValue[][];
 
 type BoardState = {
+  gameOver: boolean;
   grid: TicTacToeBoard;
   player: TicTacToePlayer;
 };
 
 
 const NEW_STATE: BoardState = {
+  gameOver: false,
   grid: [
     [null, null, null],
     [null, null, null],
@@ -35,6 +37,25 @@ class Board extends React.Component<{}, BoardState> {
   }
 
 
+  detectGameOver(grid: TicTacToeBoard, row: number, column: number): { gameOver: boolean, winner?: TicTacToePlayer } {
+    // check for winner on row
+    // let winner: TicTacToePlayer = this.getRowWinner(row);
+    // if (winner) {
+    //   return { gameOver: true, winner };
+    // }
+
+    // check for winner on column
+    // check for winner on diagonal
+
+    // if grid is filled, game is over
+    if (grid.every(rows => rows.every(value => value !== null))) {
+      return { gameOver: true };
+    }
+
+    return { gameOver: false };
+  }
+
+
   newGame() {
     this.setState(NEW_STATE);
   }
@@ -42,35 +63,53 @@ class Board extends React.Component<{}, BoardState> {
 
   play(row: number, column: number) {
     if (!Array.isArray(this.state.grid[row]) || this.state.grid[row][column] !== null) return;
+
+    // TODO find a better way to update a readonly nested array
+    const grid = this.state.grid.map((rowValues, rowIndex) => rowValues.map((value, columnIndex) =>
+      rowIndex === row && columnIndex === column ? this.state.player : value));
+
+    const { gameOver } = this.detectGameOver(grid, row, column);
+
     this.setState({
-      // TODO find a better way to update a readonly nested array
-      grid: this.state.grid.map((rowValues, rowIndex) => rowValues.map((value, columnIndex) =>
-        rowIndex === row && columnIndex === column ? this.state.player : value)),
+      gameOver,
+      grid,
       player: this.state.player === 1 ? 2 : 1
     });
-    // this.detectGameOver(row, column);
   }
 
 
   render() {
     // https://reactjs.org/docs/lists-and-keys.html#basic-list-component
-    const rows = this.state.grid.map((row, rowIndex) => <tr>{row.map((value, colIndex) => {
-      // https://flaviocopes.com/react-pass-parameter-event/
-      // https://reactjs.org/docs/conditional-rendering.html#inline-if-else-with-conditional-operator
-      return value ? this.renderValue(value) : <td><button onClick={() => this.play(rowIndex, colIndex)}>{rowIndex}, {colIndex}</button></td>;
-    })}</tr>);
+    const rows = this.state.grid.map((row, rowIndex) =>
+      <tr key={`tr-${rowIndex}`}>{row.map((value, colIndex) => this.renderCell(value, rowIndex, colIndex))}</tr>);
+
+    let gameOver;
+    if (this.state.gameOver) {
+      gameOver = <div>
+        <h2>Game Over!</h2>
+        <p>Stalemate… Tough game!</p>
+      </div>;
+    }
 
     return (
       <div className="board">
-        <table>{rows}</table>
+        <table><tbody>{rows}</tbody></table>
         <button onClick={() => this.newGame()}>New Game</button>
+        {gameOver}
       </div>
     );
   }
 
 
-  renderValue(value: TicTacToePlayer) {
-    return <td className={`played-${value}`}>{ value === 1 ? <Naught/> : <Cross/> }</td>;
+  renderCell(value: TicTacToeValue, row: number, column: number) {
+    return <td key={`td-${row}-${column}`} className={`played-${value}`}>
+      {value === null ? <button onClick={() => this.play(row, column)}>{row}, {column}</button> : this.renderPlayed(value)}
+    </td>;
+  }
+
+
+  renderPlayed(value: TicTacToePlayer) {
+    return value === 1 ? <Naught/> : <Cross/>;
   }
 }
 
