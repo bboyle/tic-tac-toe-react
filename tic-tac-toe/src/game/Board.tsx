@@ -50,7 +50,14 @@ class Board extends React.Component<{}, BoardState> {
     if (winner) {
       return { gameOver: true, winner };
     }
-    // check for winner on diagonal
+
+    // check for winner on diagonal (only check if player chose a diagonal square)
+    if (this.isOnDiagonal(row, column, grid.length)) {
+      winner = this.getDiagonalWinner(grid);
+      if (winner) {
+        return { gameOver: true, winner };
+      }
+    }
 
     // if grid is filled, game is over
     if (grid.every(rows => rows.every(value => value !== null))) {
@@ -126,6 +133,23 @@ class Board extends React.Component<{}, BoardState> {
   }
 
 
+  private getDiagonalWinner(grid: TicTacToeBoard): TicTacToePlayer | null {
+    let values = grid.map((row, index) => row[index]);
+    if (values[0] !== null && values.every(value => value === values[0])) {
+      return values[0];
+    }
+
+    // check reverse diagonal
+    values = grid.map((row, index) => row[row.length - index - 1]);
+    console.log('reverse diagonal?', grid, values);
+    if (values[0] !== null && values.every(value => value === values[0])) {
+      return values[0];
+    }
+
+    return null;
+  }
+
+
   private getRowWinner(grid: TicTacToeBoard, row: number): TicTacToePlayer | null {
     const values = grid[row];
     if (values[0] !== null && values.every(value => value === values[0])) {
@@ -133,6 +157,11 @@ class Board extends React.Component<{}, BoardState> {
     }
 
     return null;
+  }
+
+
+  private isOnDiagonal(row: number, column: number, gridSize: number): boolean {
+    return row === column || row + 1 === gridSize - column;
   }
 }
 
