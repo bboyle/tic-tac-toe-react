@@ -15,20 +15,28 @@ type BoardState = {
 };
 
 
+const NEW_STATE: BoardState = {
+  grid: [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null]
+  ],
+  player: 1
+};
+
+
 // https://stackoverflow.com/a/51077959/287568
 class Board extends React.Component<{}, BoardState> {
 
 
   constructor(props: any) {
     super(props);
-    this.state = {
-      grid: [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null]
-      ],
-      player: 1
-    };
+    this.state = NEW_STATE;
+  }
+
+
+  newGame() {
+    this.setState(NEW_STATE);
   }
 
 
@@ -53,12 +61,15 @@ class Board extends React.Component<{}, BoardState> {
     })}</tr>);
 
     return (
-      <table>{rows}</table>
+      <div className="board">
+        <table>{rows}</table>
+        <button onClick={() => this.newGame()}>New Game</button>
+      </div>
     );
   }
 
 
-  renderValue(value: TicTacToeValue) {
+  renderValue(value: TicTacToePlayer) {
     if (value === 1) {
       return <Naught/>;
     } else {
